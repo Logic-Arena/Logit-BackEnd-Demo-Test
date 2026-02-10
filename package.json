@@ -1,0 +1,33 @@
+{
+  "name": "figlet",
+  "version": "1.0.0",
+  "description": "test",
+  "keywords": [
+    "test"
+  ],
+  "homepage": "https://github.com/min2eo/test#readme",
+  "bugs": {
+    "url": "https://github.com/min2eo/test/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/min2eo/test.git"
+  },
+  "license": "ISC",
+  "author": "minseo",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "figlet": "^1.10.0",
+    "jsonwebtoken": "^9.0.3",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
+    "passport-kakao": "^1.0.1",
+    "socket.io": "^4.8.3"
+  }
+}
