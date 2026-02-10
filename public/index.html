@@ -1,0 +1,647 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Athens Auth + Chat (Dev)</title>
+    <style>
+      :root {
+        --bg: #0b1020;
+        --card: rgba(255, 255, 255, 0.06);
+        --card2: rgba(255, 255, 255, 0.08);
+        --text: rgba(255, 255, 255, 0.92);
+        --muted: rgba(255, 255, 255, 0.62);
+        --border: rgba(255, 255, 255, 0.12);
+        --shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+        --ok: #36d399;
+        --warn: #fbbf24;
+        --bad: #fb7185;
+        --btn: rgba(255, 255, 255, 0.1);
+        --btn2: rgba(255, 255, 255, 0.14);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          "Apple SD Gothic Neo",
+          "Noto Sans KR",
+          Arial,
+          sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(
+            1200px 600px at 20% -10%,
+            rgba(99, 102, 241, 0.35),
+            transparent 60%
+          ),
+          radial-gradient(
+            900px 500px at 90% 10%,
+            rgba(56, 189, 248, 0.22),
+            transparent 55%
+          ),
+          radial-gradient(
+            900px 500px at 60% 110%,
+            rgba(236, 72, 153, 0.2),
+            transparent 55%
+          ),
+          var(--bg);
+        min-height: 100vh;
+      }
+
+      .wrap {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 28px 18px 48px;
+      }
+
+      header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+
+      .title {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 24px;
+        letter-spacing: -0.3px;
+      }
+
+      .subtitle {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.35;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+      @media (min-width: 900px) {
+        .grid {
+          grid-template-columns: 420px 1fr;
+          align-items: start;
+        }
+      }
+
+      .card {
+        background: linear-gradient(
+          180deg,
+          var(--card),
+          rgba(255, 255, 255, 0.04)
+        );
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .card h2 {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 650;
+        letter-spacing: -0.2px;
+      }
+
+      .card .head {
+        padding: 14px 14px 12px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        background: rgba(255, 255, 255, 0.03);
+      }
+
+      .card .body {
+        padding: 14px;
+      }
+
+      .row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      .btn {
+        border: 1px solid var(--border);
+        background: var(--btn);
+        color: var(--text);
+        padding: 10px 12px;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 600;
+        letter-spacing: -0.1px;
+        transition: 0.15s ease;
+        user-select: none;
+      }
+      .btn:hover {
+        background: var(--btn2);
+        transform: translateY(-1px);
+      }
+      .btn:active {
+        transform: translateY(0px);
+      }
+      .btn.primary {
+        background: rgba(99, 102, 241, 0.25);
+        border-color: rgba(99, 102, 241, 0.35);
+      }
+      .btn.ghost {
+        background: transparent;
+      }
+      .btn.danger {
+        background: rgba(251, 113, 133, 0.18);
+        border-color: rgba(251, 113, 133, 0.32);
+      }
+
+      .badge {
+        display: inline-flex;
+        gap: 6px;
+        align-items: center;
+        padding: 7px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--muted);
+        white-space: nowrap;
+      }
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--warn);
+        box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.16);
+      }
+      .dot.ok {
+        background: var(--ok);
+        box-shadow: 0 0 0 3px rgba(54, 211, 153, 0.16);
+      }
+      .dot.bad {
+        background: var(--bad);
+        box-shadow: 0 0 0 3px rgba(251, 113, 133, 0.16);
+      }
+
+      .kv {
+        display: grid;
+        grid-template-columns: 110px 1fr;
+        gap: 10px;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+      }
+      .kv:last-child {
+        border-bottom: none;
+      }
+      .k {
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .v {
+        font-size: 13px;
+        overflow-wrap: anywhere;
+      }
+
+      .muted {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .tokenbox {
+        margin-top: 12px;
+        background: rgba(0, 0, 0, 0.35);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 14px;
+        padding: 12px;
+        max-height: 240px;
+        overflow: auto;
+        font-family:
+          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+          "Liberation Mono", "Courier New", monospace;
+        font-size: 12px;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .chat {
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        min-height: 520px;
+      }
+
+      .chatlog {
+        padding: 14px;
+        max-height: 520px;
+        overflow: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .bubble {
+        max-width: 78%;
+        padding: 10px 12px;
+        border-radius: 16px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.06);
+        align-self: flex-start;
+      }
+      .bubble.me {
+        align-self: flex-end;
+        background: rgba(99, 102, 241, 0.22);
+        border-color: rgba(99, 102, 241, 0.35);
+      }
+      .meta {
+        display: flex;
+        gap: 8px;
+        align-items: baseline;
+        margin-bottom: 6px;
+      }
+      .who {
+        font-weight: 700;
+        font-size: 12px;
+      }
+      .when {
+        color: var(--muted);
+        font-size: 11px;
+      }
+      .text {
+        font-size: 13px;
+        line-height: 1.35;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+
+      .composer {
+        padding: 12px 14px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.03);
+      }
+
+      .input {
+        flex: 1;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--text);
+        padding: 12px 12px;
+        border-radius: 12px;
+        outline: none;
+      }
+      .input::placeholder {
+        color: rgba(255, 255, 255, 0.45);
+      }
+
+      .small {
+        font-size: 11px;
+        color: var(--muted);
+      }
+
+      .toast {
+        margin-top: 10px;
+        padding: 10px 12px;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(0, 0, 0, 0.25);
+        font-family: ui-monospace, monospace;
+        font-size: 12px;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="wrap">
+      <header>
+        <div class="title">
+          <h1>Athens · 소셜 로그인 & 실시간 채팅 (Dev)</h1>
+          <div class="subtitle">
+            로그인(JWT) → 소켓 연결(JWT 인증) → 채팅 브로드캐스트 테스트.
+            <span class="small">※ 배포용이 아니라 데모용 UI</span>
+          </div>
+        </div>
+
+        <div class="badge" id="statusBadge">
+          <span class="dot" id="statusDot"></span>
+          <span id="statusText">socket: disconnected</span>
+        </div>
+      </header>
+
+      <div class="grid">
+        <!-- LEFT: AUTH / TOKENS -->
+        <section class="card">
+          <div class="head">
+            <h2>Auth / Tokens</h2>
+            <div class="row">
+              <button class="btn ghost" id="meBtn">/me 확인</button>
+              <button class="btn danger" id="logoutBtn">토큰 삭제</button>
+            </div>
+          </div>
+
+          <div class="body">
+            <div class="row" style="margin-bottom: 10px">
+              <button class="btn primary" id="googleBtn">Google 로그인</button>
+              <button class="btn primary" id="kakaoBtn">Kakao 로그인</button>
+            </div>
+
+            <div class="row" style="margin-bottom: 10px">
+              <button class="btn" id="connectBtn">소켓 연결</button>
+              <button class="btn" id="disconnectBtn">소켓 끊기</button>
+            </div>
+
+            <div class="muted">
+              팁) 카카오는 이미 로그인/동의가 되어 있으면 로그인 화면이 안
+              보이고 바로 토큰 저장 후 돌아올 수 있어.
+            </div>
+
+            <div class="tokenbox" id="tokenOut"></div>
+
+            <div class="toast" id="toast">ready.</div>
+          </div>
+        </section>
+
+        <!-- RIGHT: CHAT -->
+        <section class="card chat">
+          <div class="head">
+            <h2>Chat</h2>
+            <div class="small" id="socketIdText">socketId: -</div>
+          </div>
+
+          <div class="chatlog" id="chatlog"></div>
+
+          <div class="composer">
+            <input class="input" id="msg" placeholder="메시지 입력…" />
+            <button class="btn primary" id="sendBtn">보내기</button>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+
+    <script>
+      // ---------------------------
+      // DOM
+      // ---------------------------
+      const tokenOut = document.getElementById("tokenOut");
+      const toast = document.getElementById("toast");
+
+      const statusBadge = document.getElementById("statusBadge");
+      const statusDot = document.getElementById("statusDot");
+      const statusText = document.getElementById("statusText");
+      const socketIdText = document.getElementById("socketIdText");
+
+      const chatlog = document.getElementById("chatlog");
+      const msgInput = document.getElementById("msg");
+
+      const googleBtn = document.getElementById("googleBtn");
+      const kakaoBtn = document.getElementById("kakaoBtn");
+      const logoutBtn = document.getElementById("logoutBtn");
+      const connectBtn = document.getElementById("connectBtn");
+      const disconnectBtn = document.getElementById("disconnectBtn");
+      const sendBtn = document.getElementById("sendBtn");
+      const meBtn = document.getElementById("meBtn");
+
+      // ---------------------------
+      // state
+      // ---------------------------
+      let socket = null;
+      let myUserId = null; // /me에서 확인한 내 user.id 저장(말풍선 me 판별용)
+
+      // ---------------------------
+      // helpers
+      // ---------------------------
+      function setStatus(kind, text) {
+        // kind: "ok" | "warn" | "bad"
+        statusDot.classList.remove("ok", "bad");
+        if (kind === "ok") statusDot.classList.add("ok");
+        if (kind === "bad") statusDot.classList.add("bad");
+        statusText.textContent = text;
+      }
+
+      function showToast(text) {
+        toast.textContent = text;
+      }
+
+      function renderTokens() {
+        const accessToken = localStorage.getItem("accessToken");
+        const refreshToken = localStorage.getItem("refreshToken");
+        tokenOut.textContent = JSON.stringify(
+          { accessToken, refreshToken },
+          null,
+          2,
+        );
+      }
+
+      function formatTime(iso) {
+        try {
+          const d = new Date(iso);
+          return d.toLocaleTimeString("ko-KR", {
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+        } catch {
+          return "";
+        }
+      }
+
+      function addBubble({ from, text, at }) {
+        const isMe = myUserId && from?.id === myUserId;
+
+        const el = document.createElement("div");
+        el.className = "bubble" + (isMe ? " me" : "");
+
+        const meta = document.createElement("div");
+        meta.className = "meta";
+
+        const who = document.createElement("div");
+        who.className = "who";
+        who.textContent = from?.email || from?.id || "unknown";
+
+        const when = document.createElement("div");
+        when.className = "when";
+        when.textContent = formatTime(at);
+
+        meta.appendChild(who);
+        meta.appendChild(when);
+
+        const body = document.createElement("div");
+        body.className = "text";
+        body.textContent = String(text ?? "");
+
+        el.appendChild(meta);
+        el.appendChild(body);
+
+        chatlog.appendChild(el);
+        chatlog.scrollTop = chatlog.scrollHeight;
+      }
+
+      async function fetchMe() {
+        const token = localStorage.getItem("accessToken");
+        if (!token) {
+          showToast("❌ accessToken 없음. 먼저 로그인하세요.");
+          return null;
+        }
+
+        try {
+          const res = await fetch("/me", {
+            headers: { Authorization: "Bearer " + token },
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            showToast("❌ /me 실패: " + (data?.message || res.status));
+            return null;
+          }
+          myUserId = data?.user?.id || null;
+          showToast("✅ /me OK: " + JSON.stringify(data.user));
+          return data.user;
+        } catch (e) {
+          showToast("❌ /me 에러: " + e.message);
+          return null;
+        }
+      }
+
+      // ---------------------------
+      // socket
+      // ---------------------------
+      function connectSocket() {
+        const token = localStorage.getItem("accessToken");
+        if (!token) {
+          showToast("❌ accessToken 없음. 먼저 로그인하세요.");
+          setStatus("bad", "socket: no token");
+          return;
+        }
+
+        if (socket && socket.connected) {
+          showToast("ℹ️ 이미 연결됨: " + socket.id);
+          setStatus("ok", "socket: connected (" + socket.id + ")");
+          return;
+        }
+
+        socket = io({
+          auth: { token },
+          transports: ["websocket"],
+        });
+
+        setStatus("warn", "socket: connecting...");
+        showToast("connecting...");
+
+        socket.on("connect", () => {
+          setStatus("ok", "socket: connected (" + socket.id + ")");
+          socketIdText.textContent = "socketId: " + socket.id;
+          showToast("✅ connected: " + socket.id);
+        });
+
+        socket.on("connect_error", (err) => {
+          setStatus("bad", "socket: connect_error");
+          socketIdText.textContent = "socketId: -";
+          showToast("❌ connect_error: " + err.message);
+        });
+
+        socket.on("chat:msg", (data) => {
+          addBubble(data);
+        });
+
+        socket.on("disconnect", (reason) => {
+          setStatus("bad", "socket: disconnected");
+          socketIdText.textContent = "socketId: -";
+          showToast("❌ disconnected: " + reason);
+        });
+      }
+
+      function disconnectSocket() {
+        if (!socket) {
+          showToast("ℹ️ 소켓이 아직 없음");
+          return;
+        }
+        socket.disconnect();
+        socket = null;
+        setStatus("bad", "socket: disconnected");
+        socketIdText.textContent = "socketId: -";
+        showToast("disconnected.");
+      }
+
+      function sendChat() {
+        const text = msgInput.value.trim();
+        if (!text) return;
+
+        if (!socket || !socket.connected) {
+          showToast("❌ 소켓 연결 필요. [소켓 연결]을 눌러주세요.");
+          return;
+        }
+
+        socket.emit("chat:send", text);
+        msgInput.value = "";
+      }
+
+      // ---------------------------
+      // events
+      // ---------------------------
+      googleBtn.onclick = () => (location.href = "/auth/google");
+      kakaoBtn.onclick = () => (location.href = "/auth/kakao");
+
+      logoutBtn.onclick = () => {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        myUserId = null;
+        renderTokens();
+        showToast("🧹 토큰 삭제 완료");
+        disconnectSocket();
+      };
+
+      connectBtn.onclick = async () => {
+        // 내 정보 있으면 말풍선 me 판별이 예뻐짐
+        await fetchMe();
+        connectSocket();
+      };
+
+      disconnectBtn.onclick = disconnectSocket;
+
+      sendBtn.onclick = sendChat;
+      msgInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") sendChat();
+      });
+
+      meBtn.onclick = fetchMe;
+
+      // ---------------------------
+      // init
+      // ---------------------------
+      renderTokens();
+
+      // 토큰이 이미 있으면 자동으로 내 정보 불러오고 연결 시도(편의)
+      (async () => {
+        const token = localStorage.getItem("accessToken");
+        if (!token) {
+          setStatus("bad", "socket: disconnected");
+          showToast("로그인 후 소켓 연결을 눌러주세요.");
+          return;
+        }
+        await fetchMe();
+        connectSocket();
+      })();
+    </script>
+  </body>
+</html>

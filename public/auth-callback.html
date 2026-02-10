@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Auth Callback</title>
+  </head>
+  <body>
+    <p>로그인 처리 중...</p>
+    <script>
+      const params = new URLSearchParams(location.search);
+      const accessToken = params.get("accessToken");
+      const refreshToken = params.get("refreshToken");
+
+      if (accessToken) localStorage.setItem("accessToken", accessToken);
+      if (refreshToken) localStorage.setItem("refreshToken", refreshToken);
+
+      // ✅ 로그인 끝나면 채팅 페이지(메인)로 복귀
+      location.replace("/");
+    </script>
+  </body>
+</html>
